@@ -21,7 +21,7 @@ npm run local
 ```
 ## See App live at:
 
-[YelpCamp](https://www.npmjs.com/package/npm)
+[YelpCamp](https://yelp-camp-2018.herokuapp.com/campgrounds)
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
