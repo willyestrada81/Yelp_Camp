@@ -1,4 +1,5 @@
-var express     = require("express"),
+require('dotenv').config()
+const express     = require("express"),
     app         = express(),
     bodyParser  = require("body-parser"),
     mongoose    = require("mongoose"),
@@ -13,10 +14,10 @@ var express     = require("express"),
     seedDB      = require("./seeds"),
     methodOverride = require("method-override");
 // configure dotenv
-require('dotenv').load();
+
  
 //requiring routes
-var commentRoutes    = require("./routes/comments"),
+const commentRoutes    = require("./routes/comments"),
     campgroundRoutes = require("./routes/campgrounds"),
     indexRoutes      = require("./routes/index")
     
@@ -24,10 +25,10 @@ var commentRoutes    = require("./routes/comments"),
 mongoose.Promise = global.Promise;
 
 //MONGO DB CONFIG
-const mongoDB = require('./config/keys').MongoURI;
+const mongoDB = process.env.MongoURI;
 
 //CONNECT TO MONGODB USING MONGOOSE
-mongoose.connect(mongoDB, { useNewUrlParser: true })
+mongoose.connect(mongoDB, { useNewUrlParser: true }) 
     .then(() => console.log('MongoDB Connected...'))
     .catch(err => console.log(err)); 
 

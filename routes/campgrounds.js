@@ -1,11 +1,20 @@
+var NodeGeocoder = require('node-geocoder');
 var express = require("express");
 var router  = express.Router();
 var Campground = require("../models/campground");
 var Comment = require("../models/comment");
 var middleware = require("../middleware");
-var geocoder = require('geocoder');
 var { isLoggedIn, checkUserCampground, checkUserComment, isAdmin, isSafe } = middleware; // destructuring assignment
 
+
+var options = {
+    provider: 'google',
+    httpAdapter: 'https',
+    apiKey: process.env.GEOCODER_API_KEY,
+    formatter: null
+};
+
+var geocoder = NodeGeocoder(options);
 // Define escapeRegex function for search feature
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -40,36 +49,50 @@ router.get("/", function(req, res){
 });
 
 //CREATE - add new campground to DB
-router.post("/", isLoggedIn, isSafe, function(req, res){
-  // get data from form and add to campgrounds array
-  var name = req.body.name;
-  var image = req.body.image;
-  var desc = req.body.description;
-  var author = {
-      id: req.user._id,
-      username: req.user.username
-  }
-  var cost = req.body.cost;
-  geocoder.geocode(req.body.location, function (err, data) {
-    if (err || data.status === 'ZERO_RESULTS') {
-      req.flash('error', 'Invalid address');
-      return res.redirect('back');
+//CREATE - add new campground to DB
+router.post("/", middleware.isLoggedIn, function (req, res) {
+    // get data from form and add to campgrounds array
+    let name = req.body.name;
+    let cost = req.body.cost;
+    let image = req.body.image;
+    let desc = req.body.description;
+    let author = {
+        id: req.user._id,
+        username: req.user.username
     }
-    // var lat = data.results[0].geometry.location.lat;
-    // var lng = data.results[0].geometry.location.lng;
-    // var location = data.results[0].formatted_address;
-    var newCampground = {name: name, image: image, description: desc, cost: cost, author:author};
-    // Create a new campground and save to DB
-    Campground.create(newCampground, function(err, newlyCreated){
-        if(err){
+    let location = req.body.location;
+    geocoder.geocode(location)
+        .then(function (responce) {
+            console.log(responce);
+            let lat = responce[0].latitude;
+            let lng = responce[0].longitude
+            let location = responce[0].formattedAddress;
+            console.log(`${lat} + ${lng} + ${location}`)
+
+            let newCampground = { name: name, image: image, description: desc, author: author, cost:cost, location: location, lat: lat, lng: lng };
+            // Create a new campground and save to DB
+            Campground.create(newCampground, function (err, newlyCreated) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    //redirect back to campgrounds page
+                    console.log(newlyCreated);
+                    res.redirect("/campgrounds");
+                }
+            });
+
+        })
+        .catch(function (err) {
             console.log(err);
-        } else {
-            //redirect back to campgrounds page
-            console.log(newlyCreated);
-            res.redirect("/campgrounds");
-        }
-    });
-  });
+            if (err || !responce.length) {
+                req.flash('error', 'Invalid address');
+                return res.redirect('back');
+            }
+        });
+
+    
+       
+        
 });
 
 //NEW - show form to create new campground
