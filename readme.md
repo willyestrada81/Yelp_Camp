@@ -5,8 +5,6 @@ Yelp_Camp is Node, Express app using MongoDB, Passport.js Auth and Bootstrap for
 <<<<<<< HEAD
 ## Installation
 =======
-### See Live at:
->>>>>>> 0364596ffe90d69f5b5565f015e2cb003640e4bb
 
 Use the package manager [npm](https://www.npmjs.com/package/npm) to install.
 
